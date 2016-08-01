@@ -5,6 +5,8 @@
  * Provides functionality for handling postal addresses.
  */
 
+use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
+use Drupal\Core\Entity\Sql\SqlContentEntityStorageException;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -41,6 +43,7 @@ function address_theme() {
     'address_plain' => [
       'variables' => [
         'given_name' => '',
+        'additional_name' => '',
         'family_name' => '',
         'organization' => '',
         'address_line1' => '',
@@ -52,6 +55,108 @@ function address_theme() {
         'administrative_area' => [],
         'country' => [],
       ],
-    ]
+    ],
   ];
+}
+
+function address_test_update_8001() {
+  // Save a list of processed fields so that we can do clean up once the
+  // original data is migrated.
+  $processed_fields = [];
+  $columns_to_add = ['family_name', 'additional_name', 'given_name'];
+
+  $field_type_manager = \Drupal::getContainer()->get('plugin.manager.field.field_type');
+  $address_definition = $field_type_manager->getDefinition('address');
+  /** @var \Drupal\address\Plugin\Field\FieldType\AddressItem $address_item_class */
+  $address_item_class = $address_definition['class'];
+
+  $schema = \Drupal::database()->schema();
+  $entity_type_manager = \Drupal::getContainer()->get('entity_type.manager');
+  $entity_field_manager = \Drupal::getContainer()->get('entity_field.manager');
+  $entity_field_map = \Drupal::getContainer()->get('entity_field.manager')->getFieldMapByFieldType('address');
+  // The key-value collection for tracking installed storage schema.
+  $entity_storage_schema_sql = \Drupal::keyValue('entity.storage_schema.sql');
+  $entity_definitions_installed = \Drupal::keyValue('entity.definitions.installed');
+
+  foreach ($entity_field_map as $entity_type_id => $field_map) {
+    $entity_storage = $entity_type_manager->getStorage($entity_type_id);
+    // Only SQL storage based entities are supported / throw known exception.
+    if ($entity_storage instanceof SqlContentEntityStorage) {
+      $field_storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+      /** @var Drupal\Core\Entity\Sql\DefaultTableMapping $table_mapping */
+      $table_mapping = $entity_storage->getTableMapping($field_storage_definitions);
+      // Only need field storage definitions of address fields.
+      /** @var \Drupal\Core\Field\FieldStorageDefinitionInterface $field_storage_definition */
+      foreach (array_intersect_key($field_storage_definitions, $field_map) as $field_storage_definition) {
+        // Get the current field's name.
+        $field_name = $field_storage_definition->getName();
+        $processed_fields[$field_name] = $entity_type_id;
+        // We need to know the schema column name for the old `recipient` value.
+        $initial_from_field = $table_mapping->getFieldColumnName($field_storage_definition, 'recipient');
+        // Get the name of the field's table.
+        $table = $table_mapping->getFieldTableName($field_name);
+
+        // Loop over each new column and add it as a schema column change.
+        foreach ($columns_to_add as $column_id) {
+          $column = $table_mapping->getFieldColumnName($field_storage_definition, $column_id);
+
+          // Add `initial_from_field` to the new spec, as this will copy over
+          // the entire data.
+          $field_schema = $address_item_class::schema($field_storage_definition);
+          $spec = $field_schema['columns'][$column_id];
+
+          // We will not seed data into `additional_name`.
+          if ($column_id != 'additional_name') {
+            $spec += [
+              'initial_from_field' => $initial_from_field,
+            ];
+          }
+
+          // Add the new column.
+          $schema->addField($table, $column, $spec);
+
+          // Update the installed storage schema for this field as well.
+          $key = "$entity_type_id.field_schema_data.$field_name";
+          if ($field_schema_data = $entity_storage_schema_sql->get($key)) {
+            $field_schema_data[$table]['fields'][$column_id] = $field_schema['columns'][$column_id];
+            $entity_storage_schema_sql->set($key, $field_schema_data);
+          }
+          if ($table_mapping->allowsSharedTableStorage($field_storage_definition)) {
+            $key = "$entity_type_id.field_storage_definitions";
+            if ($definitions = $entity_definitions_installed->get($key)) {
+              $definitions[$field_name] = $field_storage_definition;
+              $entity_definitions_installed->set($key, $definitions);
+            }
+          }
+        }
+        // Once all columns added, and data copied. Delete the field.
+        $schema->dropField($table, $initial_from_field);
+      }
+    }
+  }
+
+  // Now we need to go through and clean up the names. Full names were copied
+  // over from `recipient` and need to be processed. This means loading the
+  // proper entities, editing, and saving.
+  foreach ($processed_fields as $field_name => $entity_type_id) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    $query = $storage->getQuery()->exists($field_name . '.family_name');
+    $entities = $storage->loadMultiple($query->execute());
+    /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+    foreach ($entities as $entity) {
+      $given_name = $entity->{$field_name}->given_name;
+      $names = explode(' ', $given_name);
+      $given_name = array_shift($names);
+
+      $family_name = $entity->{$field_name}->family_name;
+      $names = explode(' ', $family_name);
+      array_shift($names);
+      $family_name = implode(' ', $names);
+
+      $entity->{$field_name}->given_name = $given_name;
+      $entity->{$field_name}->family_name = $family_name;
+      $entity->save();
+    }
+  }
+
 }

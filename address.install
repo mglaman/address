@@ -35,3 +35,10 @@ function address_install() {
     $importer->importAll();
   }
 }
+
+/**
+ * Add given, additional, family name fields, remove recipient.
+ */
+function address_update_8001() {
+  address_test_update_8001();
+}

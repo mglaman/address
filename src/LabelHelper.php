@@ -45,6 +45,7 @@ class LabelHelper {
       AddressField::ADDRESS_LINE2 => t('Street address line 2', [], ['context' => 'Address label']),
       AddressField::ORGANIZATION => t('Company', [], ['context' => 'Address label']),
       AddressField::FAMILY_NAME => t('Last name', [], ['context' => 'Address label']),
+      AddressField::ADDITIONAL_NAME => t('Middle name', [], ['context' => 'Address label']),
       AddressField::GIVEN_NAME => t('First name', [], ['context' => 'Address label']),
     ];
   }

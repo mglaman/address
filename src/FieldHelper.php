@@ -29,6 +29,7 @@ class FieldHelper {
       AddressField::ADDRESS_LINE2 => 'address_line2',
       AddressField::ORGANIZATION => 'organization',
       AddressField::FAMILY_NAME => 'family_name',
+      AddressField::ADDITIONAL_NAME => 'additional_name',
       AddressField::GIVEN_NAME => 'given_name',
     ];
 
@@ -57,6 +58,7 @@ class FieldHelper {
       AddressField::ADDRESS_LINE2 => 'address-line2',
       AddressField::ORGANIZATION => 'organization',
       AddressField::FAMILY_NAME => 'family-name',
+      AddressField::ADDITIONAL_NAME => 'additional-name',
       AddressField::GIVEN_NAME => 'given-name',
     ];
 

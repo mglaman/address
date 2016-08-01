@@ -83,6 +83,10 @@ class AddressItem extends FieldItemBase implements AddressInterface {
           'type' => 'varchar',
           'length' => 255,
         ],
+        'additional_name' => [
+          'type' => 'varchar',
+          'length' => 255,
+        ],
         'given_name' => [
           'type' => 'varchar',
           'length' => 255,
@@ -118,6 +122,8 @@ class AddressItem extends FieldItemBase implements AddressInterface {
       ->setLabel(t('The organization'));
     $properties['family_name'] = DataDefinition::create('string')
       ->setLabel(t('The family name.'));
+    $properties['additional_name'] = DataDefinition::create('string')
+      ->setLabel(t('The additional name.'));
     $properties['given_name'] = DataDefinition::create('string')
       ->setLabel(t('The given name.'));
 
@@ -351,8 +357,26 @@ class AddressItem extends FieldItemBase implements AddressInterface {
   /**
    * {@inheritdoc}
    */
+  public function getAdditionalName() {
+    return $this->additional_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGivenName() {
     return $this->given_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getRecipient() {
+    return implode(' ', [
+      $this->getGivenName(),
+      $this->getAdditionalName(),
+      $this->getFamilyName(),
+    ]);
   }
 
 }

@@ -150,6 +150,9 @@ field.value.address:
     family_name:
       type: string
       label: 'Family name'
+    additional_name:
+      type: string
+      label: 'Additional name'
     given_name:
       type: string
       label: 'Given name'
