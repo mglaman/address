@@ -222,7 +222,8 @@ class AddressDefaultWidget extends WidgetBase implements ContainerFactoryPluginI
       'address_line1' => '',
       'address_line2' => '',
       'organization' => '',
-      'recipient' => '',
+      'family_name' => '',
+      'given_name' => '',
     ];
     // Allow other modules to alter the values.
     $event = new InitialValuesEvent($initial_values, $this->fieldDefinition);

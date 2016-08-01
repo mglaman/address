@@ -43,7 +43,8 @@ class AddressTestEventSubscriber implements EventSubscriberInterface {
       'address_line1' => 'Some address',
       'address_line2' => 'Some street',
       'organization' => 'Some Organization',
-      'recipient' => 'Some Recipient',
+      'family_name' => 'Smith',
+      'given_name' => 'John',
     ];
   }
 

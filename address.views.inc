@@ -26,7 +26,8 @@ function address_field_views_data(FieldStorageConfigInterface $field) {
     'address_line1' => 'standard',
     'address_line2' => 'standard',
     'organization' => 'standard',
-    'recipient' => 'standard',
+    'family_name' => 'standard',
+    'given_name' => 'standard',
   ];
 
   $data = views_field_default_views_data($field);

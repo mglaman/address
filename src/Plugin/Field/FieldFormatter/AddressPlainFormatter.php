@@ -132,7 +132,8 @@ class AddressPlainFormatter extends FormatterBase implements ContainerFactoryPlu
 
     $element = [
       '#theme' => 'address_plain',
-      '#recipient' => $values['recipient'],
+      '#given_name' => $values['givenName'],
+      '#family_name' => $values['familyName'],
       '#organization' => $values['organization'],
       '#address_line1' => $values['addressLine1'],
       '#address_line2' => $values['addressLine2'],

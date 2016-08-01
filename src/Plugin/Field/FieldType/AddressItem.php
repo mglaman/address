@@ -79,7 +79,11 @@ class AddressItem extends FieldItemBase implements AddressInterface {
           'type' => 'varchar',
           'length' => 255,
         ],
-        'recipient' => [
+        'family_name' => [
+          'type' => 'varchar',
+          'length' => 255,
+        ],
+        'given_name' => [
           'type' => 'varchar',
           'length' => 255,
         ],
@@ -112,8 +116,10 @@ class AddressItem extends FieldItemBase implements AddressInterface {
       ->setLabel(t('The second line of the address block.'));
     $properties['organization'] = DataDefinition::create('string')
       ->setLabel(t('The organization'));
-    $properties['recipient'] = DataDefinition::create('string')
-      ->setLabel(t('The recipient.'));
+    $properties['family_name'] = DataDefinition::create('string')
+      ->setLabel(t('The family name.'));
+    $properties['given_name'] = DataDefinition::create('string')
+      ->setLabel(t('The given name.'));
 
     return $properties;
   }
@@ -338,8 +344,15 @@ class AddressItem extends FieldItemBase implements AddressInterface {
   /**
    * {@inheritdoc}
    */
-  public function getRecipient() {
-    return $this->recipient;
+  public function getFamilyName() {
+    return $this->family_name;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGivenName() {
+    return $this->given_name;
   }
 
 }

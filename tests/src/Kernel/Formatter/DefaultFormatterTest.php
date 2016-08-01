@@ -173,7 +173,8 @@ class DefaultFormatterTest extends KernelTestBase {
       'postal_code' => '106',
       // Any HTML in the fields is supposed to be escaped.
       'organization' => 'Giant <h2>Bike</h2> Store',
-      'recipient' => 'Mr. Liu',
+      'family_name' => 'Chen',
+      'given_name' => 'Wu',
     ];
     $this->renderEntityFields($entity, $this->display);
     $expected = implode('', [
@@ -183,7 +184,7 @@ class DefaultFormatterTest extends KernelTestBase {
       'line4' => '<span class="administrative-area">台北市</span><span class="locality">大安區</span><br>' . "\n",
       'line5' => '<span class="address-line1">Sec. 3 Hsin-yi Rd.</span><br>' . "\n",
       'line6' => '<span class="organization">Giant &lt;h2&gt;Bike&lt;/h2&gt; Store</span><br>' . "\n",
-      'line7' => '<span class="recipient">Mr. Liu</span>',
+      'line7' => '<span class="family-name">Chen</span><span class="given-name">Wu</span>',
       'line8' => '</p>',
     ]);
     $this->assertRaw($expected, 'The TW address has been properly formatted.');

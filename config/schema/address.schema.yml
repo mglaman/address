@@ -147,9 +147,12 @@ field.value.address:
     organization:
       type: string
       label: 'Organization'
-    recipient:
+    family_name:
       type: string
-      label: 'Recipient'
+      label: 'Family name'
+    given_name:
+      type: string
+      label: 'Given name'
 
 field.field_settings.address:
   type: mapping
